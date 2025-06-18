@@ -1,8 +1,13 @@
-import os
-from dotenv import load_dotenv # Import this at the very top
+Guide: Building and Deploying Your Streamlit Feedback Analyzer App
+This guide will walk you through setting up your project locally and then deploying it online using GitHub and Streamlit Community Cloud.
 
-# Load environment variables from .env file (for local development)
-load_dotenv()
+Step 1: Set Up Your Project Files
+You'll need two main files in your project directory (which will become your GitHub repository).
+
+1. app.py (Your Streamlit Application Code)
+This is the core of your application. It includes all the Streamlit UI elements, the logic for reading your data, performing sentiment analysis and summarization with the Gemini API, and displaying the results.
+
+I've made sure this code is concise, efficient, and ready for deployment.
 
 import streamlit as st
 import pandas as pd
@@ -11,24 +16,22 @@ import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import numpy as np
-import re
+import re # Used for robust parsing of LLM output
 
 # --- Setup ---
-# Try to get API key from Streamlit secrets (for cloud deployment)
-# If not found (e.g., local development), fall back to os.environ (from .env)
+# Your Gemini API key must be securely added to Streamlit Cloud secrets.
+# On Streamlit Cloud, go to your app settings (three dots menu -> "Manage app" -> "Secrets")
+# Add a new secret with Key: GOOGLE_API_KEY and Value: "YOUR_GEMINI_API_KEY_HERE"
 try:
     GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
 except KeyError:
-    GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY") # Load from .env via os.environ
-
-if not GEMINI_API_KEY:
-    st.error("Google API Key not found. Please set it in Streamlit secrets or a local .env file.")
-    st.stop()
+    st.error("Google API Key not found in Streamlit secrets. Please add 'GOOGLE_API_KEY' to your app's secrets for deployment.")
+    st.info("For local testing, you can create a `.streamlit/secrets.toml` file with `GOOGLE_API_KEY='YOUR_KEY'`")
+    st.stop() # Stop the app execution if the key is missing
 
 genai.configure(api_key=GEMINI_API_KEY)
+# Initialize the Gemini 2.0 Flash model
 model = genai.GenerativeModel("gemini-2.0-flash")
-
-# ... rest of your app.py code ...
 
 # Set basic Streamlit page configuration
 st.set_page_config(
@@ -292,3 +295,4 @@ else:
     })
     st.dataframe(sample_data, use_container_width=True)
     st.markdown("*(Your file can have many columns, but at least one should contain open-ended text feedback)*")
+
