@@ -6,4 +6,3 @@ wordcloud==1.9.3
 matplotlib==3.9.0
 numpy==1.26.4
 openpyxl==3.1.5
-python-dotenv==1.0.0  # Add this line only for local .env usage
