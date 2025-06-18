@@ -1,3 +1,9 @@
+import os
+from dotenv import load_dotenv # Import this at the very top
+
+# Load environment variables from .env file (for local development)
+load_dotenv()
+
 import streamlit as st
 import pandas as pd
 import google.generativeai as genai
@@ -5,22 +11,24 @@ import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import numpy as np
-import re # Used for robust parsing of LLM output
+import re
 
 # --- Setup ---
-# Your Gemini API key must be securely added to Streamlit Cloud secrets.
-# On Streamlit Cloud, go to your app settings (three dots menu -> "Manage app" -> "Secrets")
-# Add a new secret with Key: GOOGLE_API_KEY and Value: "YOUR_GEMINI_API_KEY_HERE"
+# Try to get API key from Streamlit secrets (for cloud deployment)
+# If not found (e.g., local development), fall back to os.environ (from .env)
 try:
     GEMINI_API_KEY = st.secrets["GOOGLE_API_KEY"]
 except KeyError:
-    st.error("Google API Key not found in Streamlit secrets. Please add 'GOOGLE_API_KEY' to your app's secrets for deployment.")
-    st.info("For local testing, you can create a `.streamlit/secrets.toml` file with `GOOGLE_API_KEY='YOUR_KEY'`")
-    st.stop() # Stop the app execution if the key is missing
+    GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY") # Load from .env via os.environ
+
+if not GEMINI_API_KEY:
+    st.error("Google API Key not found. Please set it in Streamlit secrets or a local .env file.")
+    st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
-# Initialize the Gemini 2.0 Flash model
 model = genai.GenerativeModel("gemini-2.0-flash")
+
+# ... rest of your app.py code ...
 
 # Set basic Streamlit page configuration
 st.set_page_config(
